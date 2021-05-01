@@ -1,0 +1,53 @@
+**/.env*
+**/.git
+**/.gitignore
+**/.codeclimate.yml
+**/.dockerignore
+**/.gitlab-ci.yml
+**/.hound.yml
+**/.travis.yml
+LICENSE.md
+README.md
+**/docker-compose.*
+**/Dockerfile
+**/node_modules/*
+
+# OS X
+**/.DS_Store
+**/.AppleDouble
+**/.LSOverride
+# Thumbnails
+**/._*
+# Files that might appear on external disk
+**/.Spotlight-V100
+**/.Trashes
+
+# Rails
+**/.env.sample
+**/*.rbc
+**/capybara-*.html
+**/log
+/tmp/*
+/tmp/pids/*
+!/tmp/.gitkeep
+!/tmp/pids
+!/tmp/pids/.gitkeep
+**/db/*.sqlite3
+**/db/*.sqlite3-journal
+**/public/system
+**/coverage/
+**/spec/tmp
+**/.orig
+**/.bundle
+**/.ruby-version
+**/.ruby-gemset
+**/.rvmrc
+# if using bower-rails ignore default bower_components path bower.json files
+**/vendor/assets/bower_components
+**/*.bowerrc
+**/bower.json
+**/public/assets/*
+**/storage/*
+**/public/packs/*
+**/public/packs-test/*
+**/.byebug*

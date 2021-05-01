@@ -1,0 +1,11 @@
+build:
+  docker:
+    web: ./Dockerfile
+  config:
+    EXCLUDE_BUNDLE: --without development test assets
+run:
+  web: hivemind
+  worker:
+    command:
+      - bundle exec rake jobs:work
+    image: web

@@ -1,0 +1,80 @@
+version: 2.1
+
+executors:
+  default:
+    working_directory: ~/csv-importer-api
+    docker:
+      - image: circleci/ruby:2.7.2
+        environment:
+          BUNDLE_JOBS: 3
+          BUNDLE_PATH: vendor/bundle
+          BUNDLE_RETRY: 3
+          BUNDLER_VERSION: 2.1.4
+          DOMAIN: localhost
+          VERBOSE_QUERY: false
+          LOG_LEVEL_TEST: fatal
+          WEB_CONCURRENCY: 1
+          RAILS_MAX_THREADS: 5
+          LANG: en_US.UTF-8
+          ENCRYPTION_KEY: csv-very-secure-key
+          RAILS_ENV: test
+          TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/csv_importer_test
+      - image: circleci/postgres:12.1
+        environment:
+          POSTGRES_DB: csv_importer_test
+          POSTGRES_USER: postgres
+
+commands:
+  configure_bundler:
+    description: Configure bundler
+    steps:
+      - run:
+          name: Configure bundler
+          command: |
+            echo 'export BUNDLER_VERSION=$(cat Gemfile.lock | tail -1 | tr -d " ")' >> $BASH_ENV
+            source $BASH_ENV
+            gem install bundler
+
+jobs:
+  build:
+    executor: default
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - csv-importer-api-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
+            - csv-importer-api-
+      - configure_bundler
+      - run:
+          name: Install bundle
+          command: bundle check || bundle install
+      - run:
+          name: Install postgresql-client
+          command: sudo apt-get install postgresql-client
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run:
+          name: Setup DB
+          command: bundle exec rails db:create db:structure:load --trace
+      - run:
+          name: RSpec
+          command: |
+            bundle exec rspec --profile 10 \
+                              --format progress
+      - store_artifacts:
+          path: coverage
+      - save_cache:
+          key: csv-importer-api-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - ./csv-importer-api
+
+workflows:
+  version: 2
+  integration:
+    jobs:
+      - build

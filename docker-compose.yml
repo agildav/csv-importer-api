@@ -1,0 +1,30 @@
+# Useful commands:
+# 1. Start containers and attach to Rails API: docker-compose up -d && docker attach $(docker-compose ps -q web)
+# 2. Execute a command inside a container: docker exec -it <container_name> <command> (example: /bin/sh)
+# 3. View a container's log: docker logs -f <container_name>
+
+# IMPORTANT
+# If you are not attached to the container, all Rails related commands must be preceded with "bundle exec" (example: bundle exec rails c)
+version: "3.7"
+services:
+  db:
+    image: csv-importer-db:postgres-12.1
+    container_name: csv-importer-db
+    build: ./db
+    ports:
+      - 3100:5432
+  web:
+    depends_on:
+      - db
+    tty: true
+    stdin_open: true
+    image: csv-importer-web:rails-6.0.3.4
+    container_name: csv-importer-web
+    command: /bin/sh
+    env_file:
+      - ./.env
+    build: .
+    volumes:
+      - .:/home/admin/csv-importer
+    ports:
+      - 3000:3000
